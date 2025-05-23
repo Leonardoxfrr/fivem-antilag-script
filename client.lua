@@ -34,16 +34,8 @@ AddEventHandler('antilag:enable', function()
             end
             if veh ~= 0 and IsControlPressed(0, 71) then -- W / Gas
                 for i = 1, 15 do
-                    UseParticleFxAssetNextCall("core")
-                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
-                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
-                    PlaySoundFromEntity(-1, "Backfire", veh, "DLC_IE_VEHICLE_ENGINE_UPGRADES_SOUNDS", 0, 0)
-                    -- Knall-Effekt (Explosion ohne Schaden an Umgebung, aber mit 1% Fahrzeugsdchaden)
-                    -- 1% Schaden am Fahrzeug
-                    local health = GetEntityHealth(veh)
-                    local maxHealth = GetEntityMaxHealth(veh)
-                    local newHealth = math.max(health - math.floor(maxHealth * 0.01), 100)
-                    SetEntityHealth(veh, newHealth)
+                    -- Test: Nur HUD Sound abspielen, um zu prüfen ob natives funktionieren
+                    PlaySoundFrontend(-1, "ERROR", "HUD_AMMO_SHOP_SOUNDSET", true)
                     Wait(10)
                 end
             end

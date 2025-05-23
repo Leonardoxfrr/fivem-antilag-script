@@ -1,5 +1,12 @@
 -- server.lua
+
+
+TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+
 RegisterCommand('antilag', function(source, args, rawCommand)
+    while ESX == nil do Wait(10) end
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
     if #args < 1 then
         TriggerClientEvent('antilag:usage', source)
         return
