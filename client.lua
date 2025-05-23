@@ -33,10 +33,23 @@ AddEventHandler('antilag:enable', function()
                 break
             end
             if veh ~= 0 and IsControlPressed(0, 71) then -- W / Gas
+                TriggerEvent('chat:addMessage', { args = { '[Antilag]', 'Backfire-Test läuft!' } })
                 for i = 1, 15 do
-                    -- Test: Nur HUD Sound abspielen, um zu prüfen ob natives funktionieren
-                    PlaySoundFrontend(-1, "ERROR", "HUD_AMMO_SHOP_SOUNDSET", true)
-                    Wait(10)
+                    -- Partikeleffekt laden
+                    RequestNamedPtfxAsset("core")
+                    while not HasNamedPtfxAssetLoaded("core") do
+                        Wait(1)
+                    end
+                    UseParticleFxAssetNextCall("core")
+                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+                    -- TEST: Verschiedene Soundsets ausprobieren
+                    -- 1. Explosion
+                    PlaySoundFromEntity(-1, "Explosion", veh, "BASEEXPLOSIONSOUNDSET", 0, 0)
+                    -- 2. Alternativ: Knall aus anderem Set
+                    -- PlaySoundFromEntity(-1, "Bomb_03", veh, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+                    -- 3. Alternativ: Schuss
+                    -- PlaySoundFromEntity(-1, "Fire", veh, "DLC_SM_Countermeasures_Sounds", 0, 0)
+                    Wait(100)
                 end
             end
             Wait(0)
