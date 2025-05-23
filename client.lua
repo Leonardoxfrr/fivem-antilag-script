@@ -33,12 +33,15 @@ AddEventHandler('antilag:enable', function()
                 -- Beispiel: PlaySoundFromEntity(-1, "Backfire", veh, 0, 0, 0)
                 -- Lautstärke erhöhen
                 SetVehicleAudio(veh, "monster")
-                -- Größere Flammen erzeugen
-                -- Backfire Partikeleffekt
-                UseParticleFxAssetNextCall("core")
-                StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
-                -- Optional: Zweite Flamme für Doppelauspuff
-                StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+                -- 15x Backfire-Effekt
+                for i = 1, 15 do
+                    UseParticleFxAssetNextCall("core")
+                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+                    -- Lauten Backfire-Sound abspielen
+                    PlaySoundFromEntity(-1, "Backfire", veh, "DLC_IE_VEHICLE_ENGINE_UPGRADES_SOUNDS", 0, 0)
+                    Wait(10) -- kleine Pause für sichtbare/separate Effekte
+                end
             end
             Wait(0)
         end
@@ -59,5 +62,5 @@ end)
 
 RegisterNetEvent('antilag:usage')
 AddEventHandler('antilag:usage', function()
-    TriggerEvent('chat:addMessage', { args = { '[Antilag]', 'Benutze /antilag 1 zum Aktivieren, /antilag 2 zum Deaktivieren.' } })
+    TriggerEvent('chat:addMessage', { args = { '[Antilag]', 'Benutze /antilag true zum Aktivieren, /antilag false zum Deaktivieren.' } })
 end)
