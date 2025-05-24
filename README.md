@@ -62,3 +62,7 @@ This script allows you to enable or disable an Antilag system for vehicles in Fi
 - Particle effects and sounds use FiveM natives and only work in-game.
 - For further customization (e.g. different sounds or effects), the script can be extended.
 
+
+
+
+NICHT FERTIG
