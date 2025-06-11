@@ -1,4 +1,4 @@
-DONT USE NOT DONE
+This script provides a simple Antilag system for FiveM servers.
 
 
 
@@ -69,4 +69,3 @@ This script allows you to enable or disable an Antilag system for vehicles in Fi
 
 
 
-NICHT FERTIG.......

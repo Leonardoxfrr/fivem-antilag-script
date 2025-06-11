@@ -33,13 +33,11 @@ AddEventHandler('antilag:enable', function()
                 break
             end
             if veh ~= 0 and IsControlPressed(0, 71) then -- W / Gas
-                TriggerEvent('chat:addMessage', { args = { '[Antilag]', 'Backfire-Test läuft!' } })
+                RequestNamedPtfxAsset("core")
+                while not HasNamedPtfxAssetLoaded("core") do
+                    Wait(1)
+                end
                 for i = 1, 15 do
-                    -- Partikeleffekt laden
-                    RequestNamedPtfxAsset("core")
-                    while not HasNamedPtfxAssetLoaded("core") do
-                        Wait(1)
-                    end
                     UseParticleFxAssetNextCall("core")
                     StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
                     -- TEST: Verschiedene Soundsets ausprobieren
