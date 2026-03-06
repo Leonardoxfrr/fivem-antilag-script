@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Antilag Audio</title>
+</head>
+<body>
+  <script>
+    let audioCtx;
+
+    function getContext() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function makeDistortionCurve(amount = 220) {
+      const n = 44100;
+      const curve = new Float32Array(n);
+      const k = typeof amount === "number" ? amount : 220;
+      const deg = Math.PI / 180;
+      for (let i = 0; i < n; ++i) {
+        const x = (i * 2) / n - 1;
+        curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+      }
+      return curve;
+    }
+
+    function createNoiseBuffer(ctx, durationSeconds) {
+      const frames = Math.max(1, Math.floor(ctx.sampleRate * durationSeconds));
+      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < frames; i++) {
+        const t = i / frames;
+        const envelope = Math.pow(1 - t, 2.2);
+        data[i] = (Math.random() * 2 - 1) * envelope;
+      }
+      return buffer;
+    }
+
+    function playAntilagPop(volume) {
+      const ctx = getContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const outVol = Math.max(0.05, Math.min(2.5, Number(volume) || 1.0));
+
+      const master = ctx.createGain();
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-24, now);
+      compressor.knee.setValueAtTime(18, now);
+      compressor.ratio.setValueAtTime(12, now);
+      compressor.attack.setValueAtTime(0.002, now);
+      compressor.release.setValueAtTime(0.16, now);
+
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(1.25 * outVol, now + 0.003);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+      master.connect(compressor);
+      compressor.connect(ctx.destination);
+
+      // Sharp click for attack
+      const click = ctx.createOscillator();
+      const clickGain = ctx.createGain();
+      click.type = "square";
+      click.frequency.setValueAtTime(1500, now);
+      click.frequency.exponentialRampToValueAtTime(600, now + 0.012);
+      clickGain.gain.setValueAtTime(0.9, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.016);
+      click.connect(clickGain);
+      clickGain.connect(master);
+
+      // Distorted noise burst for the crack
+      const noise = ctx.createBufferSource();
+      noise.buffer = createNoiseBuffer(ctx, 0.18);
+      const hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.setValueAtTime(800, now);
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.setValueAtTime(6200, now);
+      const shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(260);
+      shaper.oversample = "4x";
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(1.2, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+      noise.connect(hp);
+      hp.connect(lp);
+      lp.connect(shaper);
+      shaper.connect(noiseGain);
+      noiseGain.connect(master);
+
+      // Low-end punch
+      const thump = ctx.createOscillator();
+      const thumpGain = ctx.createGain();
+      thump.type = "sine";
+      thump.frequency.setValueAtTime(105, now);
+      thump.frequency.exponentialRampToValueAtTime(45, now + 0.2);
+      thumpGain.gain.setValueAtTime(0.95, now);
+      thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+      thump.connect(thumpGain);
+      thumpGain.connect(master);
+
+      click.start(now);
+      click.stop(now + 0.02);
+      noise.start(now);
+      noise.stop(now + 0.2);
+      thump.start(now);
+      thump.stop(now + 0.24);
+    }
+
+    window.addEventListener("message", (event) => {
+      const data = event.data || {};
+      if (data.type === "antilag_pop") {
+        playAntilagPop(data.volume);
+      }
+    });
+  </script>
+</body>
+</html>
