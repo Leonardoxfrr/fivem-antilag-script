@@ -1,3 +1,7 @@
+This script provides a simple Antilag system for FiveM servers.
+
+
+
 # FiveM Antilag Script
 
 ## Deutsch
@@ -72,18 +76,18 @@ When antilag is active, flames and backfire sound are produced while acceleratin
    ```
 3. Restart the server.
 
-### Configuration
-All settings are in `config.lua`.
+### Usage
+- Enter a vehicle.
+- Enable Antilag with `/antilag true`.
+- Disable Antilag with `/antilag false`.
+- While Antilag is active, flames and loud backfire sounds will be produced when accelerating.
 
-Key settings:
-- `Config.Debug = true` to enable debug logs
-- `Config.CommandName` to change command name
-- `Config.Client.TriggerMode` (`hold`, `rise`, `liftoff`)
-- `Config.Client.OnlyDriverCanTrigger` prevents trigger logic as passenger (safety)
-- `Config.Client.RequireRpm`, `RequireSpeed` for strict trigger gates
-- `Config.Client.MinRpm` for high-rpm-only behavior (when `RequireRpm = true`)
-- `Config.Client.RpmZeroFallback`, `RpmZeroMinSpeed` for vehicles that report `rpm=0.0`
-- `Config.Client.CooldownMs`, `BurstCount`, `BurstDelayMs`
-- `Config.Client.Boost` for extra power (default: off for anti-cheat safety)
-- `Config.Client.Fx.Names` (FX fallback list)
-- `Config.Client.Sound.Events`, `CoordRange`, `FrontendFallback`, `NuiFallback`, `ExplosionFallback`
+### Notes
+- Effects only work while you are in a vehicle.
+- Particle effects and sounds use FiveM natives and only work in-game.
+- For further customization (e.g. different sounds or effects), the script can be extended.
+
+
+
+
+NICHT FERTIG

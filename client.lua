@@ -369,73 +369,26 @@ local function startAntilagLoop()
                 notify('Antilag wurde automatisch deaktiviert (du bist ausgestiegen).')
                 break
             end
-
-            drawAntilagStatus()
-
-            local vehicle = GetVehiclePedIsIn(playerPed, false)
-            if vehicle ~= 0 and GetIsVehicleEngineRunning(vehicle) then
-                local playerIsDriver = isDriver(playerPed, vehicle)
-                if ONLY_DRIVER_CAN_TRIGGER and (not playerIsDriver) then
-                    clearBoostState()
-                    lastThrottlePressed = false
-                    lastHighRpm = false
-
-                    if (Config and Config.Debug) then
-                        local now = GetGameTimer()
-                        if (now - lastTriggerDebugAt) > 1200 then
-                            lastTriggerDebugAt = now
-                            debugLog('Skipping backfire: player is not driver seat')
-                        end
+            if veh ~= 0 and IsControlPressed(0, 71) then -- W / Gas
+                TriggerEvent('chat:addMessage', { args = { '[Antilag]', 'Backfire-Test läuft!' } })
+                for i = 1, 15 do
+                    -- Partikeleffekt laden
+                    RequestNamedPtfxAsset("core")
+                    while not HasNamedPtfxAssetLoaded("core") do
+                        Wait(1)
                     end
-                else
-                    applyVehicleBoost(vehicle)
-
-                    local now = GetGameTimer()
-                    local throttle = GetControlNormal(0, TRIGGER_CONTROL)
-                    if throttle < TRIGGER_THRESHOLD and IsControlPressed(0, TRIGGER_CONTROL) then
-                        throttle = 1.0
-                    end
-                    local rpm = GetVehicleCurrentRpm(vehicle)
-                    local speed = GetEntitySpeed(vehicle)
-                    local triggerPressed = throttle >= TRIGGER_THRESHOLD
-                    local rpmReadingValid = rpm > 0.01
-                    local rpmCondition = rpm >= MIN_RPM
-                    if (not rpmReadingValid) and RPM_ZERO_FALLBACK then
-                        rpmCondition = triggerPressed and speed >= RPM_ZERO_MIN_SPEED
-                    end
-                    local highRpm = (not REQUIRE_RPM) or rpmCondition
-                    local speedOk = (not REQUIRE_SPEED) or (speed >= MIN_SPEED)
-                    local triggerByMode = shouldTriggerBackfire(triggerPressed, highRpm)
-
-                    if triggerByMode and speedOk and (now - lastBackfireAt) >= BACKFIRE_COOLDOWN_MS then
-                        lastBackfireAt = now
-                        playBackfireBurst(vehicle)
-                    elseif (Config and Config.Debug) and (now - lastTriggerDebugAt) > 1200 then
-                        lastTriggerDebugAt = now
-                        debugLog(
-                            "Trigger mode=%s throttle=%.2f (>=%.2f) rpm=%.2f valid=%s gateRpm=%s gateSpeed=%s speed=%.2f throttleWas=%s rpmWasHigh=%s",
-                            TRIGGER_MODE,
-                            throttle,
-                            TRIGGER_THRESHOLD,
-                            rpm,
-                            tostring(rpmReadingValid),
-                            tostring(highRpm),
-                            tostring(speedOk),
-                            speed,
-                            tostring(lastThrottlePressed),
-                            tostring(lastHighRpm)
-                        )
-                    end
-
-                    lastThrottlePressed = triggerPressed
-                    lastHighRpm = highRpm
+                    UseParticleFxAssetNextCall("core")
+                    StartParticleFxNonLoopedOnEntity("veh_exhaust_flame", veh, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, false, false, false)
+                    -- TEST: Verschiedene Soundsets ausprobieren
+                    -- 1. Explosion
+                    PlaySoundFromEntity(-1, "Explosion", veh, "BASEEXPLOSIONSOUNDSET", 0, 0)
+                    -- 2. Alternativ: Knall aus anderem Set
+                    -- PlaySoundFromEntity(-1, "Bomb_03", veh, "DLC_HEISTS_BIOLAB_FINALE_SOUNDS", 0, 0)
+                    -- 3. Alternativ: Schuss
+                    -- PlaySoundFromEntity(-1, "Fire", veh, "DLC_SM_Countermeasures_Sounds", 0, 0)
+                    Wait(100)
                 end
-            else
-                clearBoostState()
-                lastThrottlePressed = false
-                lastHighRpm = false
             end
-
             Wait(0)
         end
 

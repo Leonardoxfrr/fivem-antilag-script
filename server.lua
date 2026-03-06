@@ -1,27 +1,12 @@
 -- server.lua
 
-local commandName = (Config and Config.CommandName) or 'antilag'
 
-local function debugLog(message, ...)
-    if not (Config and Config.Debug) then
-        return
-    end
+TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
-    local formatted = message
-    if select('#', ...) > 0 then
-        formatted = message:format(...)
-    end
-    print(('[Antilag][Server] %s'):format(formatted))
-end
-
-RegisterCommand(commandName, function(source, args)
-    if source == 0 then
-        print('[Antilag] Dieser Befehl kann nur im Spiel verwendet werden.')
-        return
-    end
-
-    debugLog('Command from source=%s args=%s', source, #args)
-
+RegisterCommand('antilag', function(source, args, rawCommand)
+    while ESX == nil do Wait(10) end
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
     if #args < 1 then
         debugLog('Toggle requested by source=%s', source)
         TriggerClientEvent('antilag:toggle', source)
