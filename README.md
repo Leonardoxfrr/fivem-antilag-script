@@ -1,93 +1,51 @@
-This script provides a simple Antilag system for FiveM servers.
+# FiveM Anti-Lag Script
 
+Experimentelle FiveM-Ressource für Anti-Lag-Effekte an Fahrzeugen. Sie enthält Konfigurationen für Partikeleffekte, Sound, NUI-Fallback und einen temporären Fahrzeug-Boost. Der aktuelle Stand ist ein **unfertiger Prototyp** und nicht für den produktiven Einsatz geeignet.
 
+## Abhängigkeiten
 
-# FiveM Antilag Script
+- FiveM/FXServer
+- ESX auf der Serverseite (`ESX.GetPlayerFromId` wird verwendet)
+- optional eine Sound-Ressource, falls die konfigurierte Soundausgabe genutzt wird
 
-## Deutsch
+Das Manifest deklariert ESX derzeit nicht explizit als Abhängigkeit und importiert ESX auch nicht automatisch. Die Einbindung muss vor einem Test überprüft und an die verwendete ESX-Version angepasst werden.
 
-Dieses Script aktiviert/deaktiviert ein Antilag-System pro Spieler ueber einen Chat-Befehl.
-Bei aktivem Antilag werden beim Beschleunigen Flammen und Backfire-Sound am Fahrzeug erzeugt.
+## Installation für die Entwicklung
 
-### Features
-- Toggle ohne Argument: `/antilag`
-- Aktivieren: `/antilag true`, `/antilag on`, `/antilag 1`
-- Deaktivieren: `/antilag false`, `/antilag off`, `/antilag 0`, `/antilag 2`
-- Dauerhafte Anzeige `Antilag Aktiv` auf dem Bildschirm
-- Automatische Deaktivierung beim Aussteigen
-- Konfigurierbarer Backfire-Burst mit Cooldown
-- Exhaust-Bone FX + Fallback, damit der Effekt auf mehr Fahrzeugen sichtbar ist
-- Debug-Logs fuer Client und Server
-- Framework-unabhaengig (kein ESX zwingend noetig)
+1. Ordner als `fivem-antilag-script` in das Ressourcenverzeichnis kopieren.
+2. ESX-Initialisierung und erforderliche Abhängigkeiten im Manifest ergänzen.
+3. Werte in `config.lua` anpassen.
+4. Die bekannten Blocker unten beheben.
+5. Ressource in einer lokalen Testumgebung starten:
 
-### Installation
-1. Lege den Ordner `fivem-antilag-script` in deinen `resources`-Ordner.
-2. Fuege in der `server.cfg` hinzu:
-   ```cfg
-   ensure fivem-antilag-script
-   ```
-3. Server neu starten.
+```cfg
+ensure fivem-antilag-script
+```
 
-### Konfiguration
-Alle Werte sind in `config.lua`.
+## Befehl
 
-Wichtige Schalter:
-- `Config.Debug = true` aktiviert Debug-Logs
-- `Config.CommandName` setzt den Chat-Befehl (Default: `antilag`)
-- `Config.Client.TriggerMode` (`hold`, `rise`, `liftoff`)
-- `Config.Client.OnlyDriverCanTrigger` blockt Trigger als Beifahrer (Safety)
-- `Config.Client.RequireRpm`, `RequireSpeed` fuer strikte Trigger
-- `Config.Client.MinRpm` fuer hohe Drehzahl (nur wenn `RequireRpm = true`)
-- `Config.Client.RpmZeroFallback`, `RpmZeroMinSpeed` fuer Fahrzeuge mit `rpm=0.0`
-- `Config.Client.CooldownMs`, `BurstCount`, `BurstDelayMs`
-- `Config.Client.Boost` fuer Leistungsplus (default: aus, Safety gegen Anti-Cheat)
-- `Config.Client.Fx.Names` (mehrere FX-Namen als Fallback)
-- `Config.Client.Sound.Events`, `CoordRange`, `FrontendFallback`, `NuiFallback`, `ExplosionFallback`
+```text
+/antilag <true|false|toggle>
+```
 
-### Debug / Fehlersuche
-Wenn nur der Text angezeigt wird, aber keine Flammen kommen:
-1. `Config.Debug = true` setzen.
-2. Resource neu starten: `restart fivem-antilag-script`.
-3. F8-Konsole pruefen (Client-Logs mit Prefix `[Antilag][Client]`).
-4. Server-Konsole pruefen (Logs mit Prefix `[Antilag][Server]`).
-5. In `config.lua` ggf. `Fx.Names`, `MinRpm`, `TriggerThreshold` anpassen.
+Akzeptierte Varianten sind unter anderem:
 
-## English
+- aktivieren: `true`, `on`, `1`, `enable`
+- deaktivieren: `false`, `off`, `0`, `2`, `disable`
+- umschalten: `toggle`, `t`
 
-This script enables/disables an antilag system per player via chat command.
-When antilag is active, flames and backfire sound are produced while accelerating.
+## Konfiguration
 
-### Features
-- Toggle without argument: `/antilag`
-- Enable: `/antilag true`, `/antilag on`, `/antilag 1`
-- Disable: `/antilag false`, `/antilag off`, `/antilag 0`, `/antilag 2`
-- Persistent on-screen `Antilag Aktiv` status text
-- Auto-disable when leaving the vehicle
-- Configurable backfire burst with cooldown
-- Exhaust-bone FX with fallback for better vehicle compatibility
-- Debug logs for client and server
-- Framework-agnostic (ESX not required)
+Die Konfiguration umfasst Partikel- und Soundeinstellungen, NUI- beziehungsweise Fallback-Ausgabe sowie Stärke und Dauer eines möglichen Boosts.
 
-### Installation
-1. Place `fivem-antilag-script` in your `resources` folder.
-2. Add to `server.cfg`:
-   ```cfg
-   ensure fivem-antilag-script
-   ```
-3. Restart the server.
+## Bekannte Blocker
 
-### Usage
-- Enter a vehicle.
-- Enable Antilag with `/antilag true`.
-- Disable Antilag with `/antilag false`.
-- While Antilag is active, flames and loud backfire sounds will be produced when accelerating.
+- Im aktiven Client-Loop wird die Variable `veh` verwendet, ohne dort zuverlässig gesetzt zu sein.
+- Auch ältere Testlogik enthält einen Zugriff auf `veh`, der zu Laufzeitfehlern führen kann.
+- Der konfigurierte Ablauf zum Erkennen und Auslösen des Anti-Lag-Effekts ist im aktiven Loop noch nicht vollständig verdrahtet.
+- Serverevents und clientseitig gemeldete Zustände benötigen vor produktiver Nutzung zusätzliche Validierung und Rate-Limits.
+- ESX ist faktisch erforderlich, obwohl frühere Dokumentation die Ressource als frameworkunabhängig beschrieben hat.
 
-### Notes
-- Effects only work while you are in a vehicle.
-- Particle effects and sounds use FiveM natives and only work in-game.
-- For further customization (e.g. different sounds or effects), the script can be extended.
+## Entwicklungsstatus
 
-
-
-
-NICHT FERTIG
+Nicht fertig. Die Ressource sollte erst dann als funktionsfähig dokumentiert werden, wenn der vollständige Ablauf reproduzierbar getestet, die ESX-Integration geklärt und die Eventgrenzen abgesichert wurden.
